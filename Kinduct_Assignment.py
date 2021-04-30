@@ -4,77 +4,164 @@ Spyder Editor
 
 This is a temporary script file.
 """
+
 import pandas as pd
 
-Goalies_df = pd.read_csv('//Users/gowthamvarmakanumuru/Desktop/Goalies_new.csv',error_bad_lines=False,
-                usecols=['playerID', 'year', 'tmID', 'GP', 'Min', 'W', 'L',
-       'T/OL', 'ENG', 'SHO', 'GA', 'SA'])
+def Load_csv_to_Dataframe(path,cols):
+    """
+    Load a csv and coverts into a dataframe wtth the required columns and skips if there any .
 
-#1)tmID: stringConverting Data type as string 
-Goalies_df['tmID'] = Goalies_df['tmID'].astype(pd.StringDtype())
-print(Goalies_df['tmID'].dtype)
+            Parameters:
+                    path (string): File path
+                    cols (list): list of column names
 
-#2)year: Year covering the datatype of year 
-Goalies_df['year'] =  pd.to_datetime(Goalies_df['year'], format='%Y')
-print(Goalies_df['year'].dtype)
-
-#3)Wins_agg: total wins / total players 
-wins_agg_stg = Goalies_df.groupby(['tmID']).agg({'playerID':'count','W':'sum'})
-wins_agg = wins_agg_stg['W']/wins_agg_stg['playerID']
-print(wins_agg)
-
-#4)Losses_agg: total losses / total players
-Losses_agg_stg = Goalies_df.groupby(['tmID']).agg({'playerID':'count','L':'sum'})
-Losses_stg = Losses_agg_stg['L']/Losses_agg_stg['playerID']
-print(Losses_stg)
+            Returns:
+                    Goalies_df (dataframe)
+    """
+    Goalies_df = pd.read_csv(path,error_bad_lines=False,usecols=cols)
+    return(Goalies_df)
 
 
-#5)GP_agg: total games played / total players
-GP_agg_stg = Goalies_df.groupby(['tmID']).agg({'playerID':'count','GP':'sum'})
-GP_agg = GP_agg_stg['GP']/GP_agg_stg['playerID']
-print(GP_agg)
-
-#6)Mins_over_GA_agg: total minutes played / total goals against
-Mins_over_GA_agg = Goalies_df.groupby(['tmID','year']).Min.agg(['sum'])/Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])
-print(Mins_over_GA_agg)
-
-#7)GA_over_SA_agg: total goals against / total shots against
-GA_over_SA_agg = Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])/Goalies_df.groupby(['tmID','year']).SA.agg(['sum'])
-print(GA_over_SA_agg)
-
-#8)avg_percentage_wins: calculate the percentage of games won for each player, then take the
-#mean at team level
-avg_perecentage_wins_stg_1 = Goalies_df.groupby(['tmID','playerID']).agg({'W': 'sum', 'GP': 'sum'})
-avg_perecentage_wins_stg_2 =avg_perecentage_wins_stg_1['W'] /( avg_perecentage_wins_stg_1['GP'])*100
-avg_perecentage_wins = avg_perecentage_wins_stg_2.groupby('tmID').mean()
-print(avg_perecentage_wins)
+def Change_column_to_StringDatattype():
+    """
+     Changes the column of Goalies_df dataframe into datatype String 
+           
+            Returns:
+                    The datatype of the column changed
+    """
+    Goalies_df['tmID'] = Goalies_df['tmID'].astype(pd.StringDtype())
+    return(Goalies_df['tmID'].dtype)
 
 
-#9)most_goals_stopped: {‘playerID’: playerID, ‘goals_stopped’: goals_stopped}
-#Description: calculate goals stopped per player, then take the player with the max goals
-#stopped and put the details in the dictionary
-most_goals_stopped_stg = Goalies_df.groupby(['playerID'], sort='Desc').agg({'SA':'sum' })
-most_goals_stopped_stg_index_reset = most_goals_stopped_stg.reset_index()
-most_goals_stopped_final = most_goals_stopped_stg_index_reset[most_goals_stopped_stg_index_reset['SA'] == float(most_goals_stopped_stg_index_reset['SA'].max())]
-most_goals_stopped_dict ={}
-most_goals_stopped_dict['playerID']= list(most_goals_stopped_final['playerID'])
-most_goals_stopped_dict['goals_stopped']= list(most_goals_stopped_final['SA'])
-print(most_goals_stopped_dict)
+def Change_Column_to_yearDatatype():
+   """
+     Changes the column of Goalies_df dataframe into datatype datetime format 
+           
+            Returns:
+                    The datatype of the column changed
+   """
+   Goalies_df['year'] = pd.to_datetime(Goalies_df['year'], format='%Y')
+   return(Goalies_df['year'].dtype)
+        
 
-#10)most_efficient_player: {‘playerID’: playerID, ‘efficiency’: goals_stopped / minutes played}
-#Description: calculate the goals stopped per minutes of play for each player, then take the
-#player with the max efficiency just calculated and put the details in the dictionary
-efficient_player_groupby = Goalies_df.groupby(['playerID'], sort='Desc').agg({'Min':'sum', 'SA':'sum' })
-efficient_player_stg = efficient_player_groupby['SA']/efficient_player_groupby['Min']
-efficient_player_stg = efficient_player_stg.reset_index()
-efficient_player_stg = efficient_player_stg[efficient_player_stg[0] == float(efficient_player_stg[0].max())]
-most_efficient_player_dict ={}
-most_efficient_player_dict['playerID']= list(efficient_player_stg['playerID'])
-most_efficient_player_dict['efficiency']= list(efficient_player_stg[0])
-print(most_efficient_player_dict)
+def Caluclate_Wins_Loses_GP_Agg():
+    """
+     Function to caluclate the wins , losses & Games Played Aggregare
+           
+            Returns:
+                wins_agg: Pandas Series object of Wins_agg per each of the team
+                losses_agg: Pandas Series object of Losses_agg per each of the team
+                GP_agg: Pandas Series object of GP_agg per each of the team    
+   """
+    Groupby_stg = Goalies_df.groupby(['tmID']).agg({'playerID':'count','W':'sum','L':'sum','GP':'sum'})
+    wins_agg = Groupby_stg['W']/Groupby_stg['playerID']
+    losses_agg = Groupby_stg['L']/Groupby_stg['playerID']
+    GP_agg = Groupby_stg['GP']/Groupby_stg['playerID']
+    return(wins_agg,losses_agg,GP_agg)
 
 
+def Caluclate_agg_Stg():
+    """
+     Function to caluclate the Mins_over_GA_agg,GA_over_SA_agg
+           
+            Returns:
+            Mins_over_GA_agg, GA_over_SA_agg
+    """
+    
+    Mins_over_GA_agg = Goalies_df.groupby(['tmID','year']).Min.agg(['sum'])/Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])
+    GA_over_SA_agg = Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])/Goalies_df.groupby(['tmID','year']).SA.agg(['sum'])
+    return(Mins_over_GA_agg,GA_over_SA_agg)
 
+
+def avg_percentage_wins():
+    """
+    Function to caluclate avg_perecentage_wins
+           
+            Returns:
+                avg_perecentage_wins
+    """
+    avg_perecentage_wins_stg_1 = Goalies_df.groupby(['tmID','playerID']).agg({'W': 'sum', 'GP': 'sum'})
+    avg_perecentage_wins_stg_2 =avg_perecentage_wins_stg_1['W'] /( avg_perecentage_wins_stg_1['GP'])*100
+    avg_perecentage_wins = avg_perecentage_wins_stg_2.groupby('tmID').mean()
+    return(avg_perecentage_wins)
+
+def most_goals_stopped_efficency():
+    """
+     Function to caluclate miost goals played player, most effiecient player 
+           
+            Returns:
+                most_goals_stopped_dict: returns a dict with 1 value of the most goals scored player 
+                most_efficient_player_dict:returns a dict with 1 value of the most efficeint player 
+                   
+    """
+    #caluclate the most goals scored player
+    most_goals_stopped_stg = Goalies_df.groupby(['playerID'], sort='Desc').agg({'SA':'sum','GA':'sum' ,'Min':'sum'})
+    most_goals_stopped_stg_1 = (most_goals_stopped_stg['SA']-most_goals_stopped_stg['GA'])
+    most_goals_stopped_stg_index_reset = most_goals_stopped_stg_1.reset_index()
+    most_goals_stopped_final = most_goals_stopped_stg_index_reset[most_goals_stopped_stg_index_reset[0] == float(most_goals_stopped_stg_index_reset[0].max())]
+        
+    most_goals_stopped_dict ={}
+    most_goals_stopped_dict['playerID']= list(most_goals_stopped_final['playerID'])
+    most_goals_stopped_dict['goals_stopped']= list(most_goals_stopped_final[0])
+    
+    # Caluclate the most efficient player
+    most_goals_stopped_eff = (most_goals_stopped_stg['SA']-most_goals_stopped_stg['GA'])/most_goals_stopped_stg['Min']
+    most_goals_stopped_eff = most_goals_stopped_eff.reset_index()
+    most_goals_stopped_eff = most_goals_stopped_eff[most_goals_stopped_eff[0] == float(most_goals_stopped_eff[0].max())]
+    most_efficient_player_dict ={}
+    most_efficient_player_dict['playerID']= list(most_goals_stopped_eff['playerID'])
+    most_efficient_player_dict['efficiency']= list(most_goals_stopped_eff[0])
+
+    return(most_goals_stopped_dict,most_efficient_player_dict)
+        
+
+
+if __name__ == "__main__":
+    
+    Goalies_df = Load_csv_to_Dataframe('//Users/gowthamvarmakanumuru/Desktop/Goalies_new.csv',['playerID', 'year', 'tmID', 'GP', 'Min', 'W', 'L',
+       'T/OL', 'ENG', 'SHO', 'GA', 'SA'])   
+    
+ #1)tmID: stringConverting Data type as string    
+    print(Change_column_to_StringDatattype())
+    
+ #2)year: Year covering the datatype of year 
+    print(Change_Column_to_yearDatatype())
+    
+    wins_agg,losses_agg,GP_agg=Caluclate_Wins_Loses_GP_Agg()
+    
+  #3)Wins_agg: total wins / total players 
+    print(wins_agg)
+    
+  #4)Losses_agg: total losses / total players
+    print(losses_agg)
+    
+  #5)GP_agg: total games played / total players
+    print(GP_agg)
+    
+    Mins_over_GA_agg,GA_over_SA_agg=Caluclate_agg_Stg()
+    
+   #6)Mins_over_GA_agg: total minutes played / total goals against
+    print(Mins_over_GA_agg)
+    
+   #7)GA_over_SA_agg: total goals against / total shots against
+    print(GA_over_SA_agg)
+    
+    """8)avg_percentage_wins: calculate the percentage of games won for each player, then take the
+       mean at team level"""
+       
+    print(avg_percentage_wins())
+    
+    most_goals_stopped_dict,most_efficient_player_dict=most_goals_stopped_efficency()
+    
+    """9)most_goals_stopped: {‘playerID’: playerID, ‘goals_stopped’: goals_stopped}
+    #escription: calculate goals stopped per player, then take the player with the max goals
+    stopped and put the details in the dictionary"""
+
+    print(most_goals_stopped_dict)
+    
+    
+    print(most_efficient_player_dict)
+    
 
 
 
