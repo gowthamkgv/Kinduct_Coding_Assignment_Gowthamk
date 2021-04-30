@@ -159,6 +159,9 @@ if __name__ == "__main__":
 
     print(most_goals_stopped_dict)
     
+    """10)most_efficient_player: {‘playerID’: playerID, ‘efficiency’: goals_stopped / minutes played}
+     Description: calculate the goals stopped per minutes of play for each player, then take the
+    player with the max efficiency just calculated and put the details in the dictionary"""
     
     print(most_efficient_player_dict)
     
