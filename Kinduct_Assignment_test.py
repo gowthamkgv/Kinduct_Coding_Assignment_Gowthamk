@@ -19,7 +19,6 @@ def df():
                                                                                        'W', 'L','T/OL', 'ENG', 'SHO', 'GA', 'SA'])
 
 
-
 def test_columns(df):
     dt.validate(
         df.columns,
@@ -31,21 +30,10 @@ def test_columns(df):
 def test_year(df):
     dt.validate(df['tmID'], int)
 
-
-@pytest.mark.mandatory
-def test_runtime(df):
-    dt.validate(df['year'], int)
+def test_title(self):
+    self.assertValidRegex(df['year'], r'^[1-2][0-9][0-9][0-9]')
+   
     
-    
-    """
-def test_for_missing_maxSales():
-    assert maxSale.maxSale(data) != "Mazda"
-
-def test_for_ok_mostSaleType():
-    assert maxSale.mostSaleType(data) == "Passenger"
-
-def test_for_missing_mostSaleType():
-    assert maxSale.mostSaleType(data) == "Car"""
 
 if __name__ == '__main__':
     import sys
