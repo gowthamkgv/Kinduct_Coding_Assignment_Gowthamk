@@ -30,7 +30,7 @@ def test_columns(df):
 def test_year(df):
     dt.validate(df['tmID'], int)
 
-def test_title(self):
+def test_values_in_year(self):
     self.assertValidRegex(df['year'], r'^[1-2][0-9][0-9][0-9]')
    
     
