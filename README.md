@@ -1,14 +1,11 @@
 # Kinduct_Coding_Assignment_Gowthamk
-
-Executive Summary:
-
 Perquisites Required:
 
 Python3
 
 Packages Used:
-Pip install Pandas
-Pip install pytest
+Pip install Pandas,
+Pip install pytest,
 Pip install datatest
 
 Introduction: A Repository was created to completed the task for Kinduct Assignment to complete the Goaltending Statistics 
