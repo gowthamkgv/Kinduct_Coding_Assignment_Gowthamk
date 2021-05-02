@@ -6,6 +6,7 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import pytest
 
 def Load_csv_to_Dataframe(path,cols):
     """
@@ -18,7 +19,11 @@ def Load_csv_to_Dataframe(path,cols):
             Returns:
                     Goalies_df (dataframe)
     """
+    assert len(path)>0, 'The path is invalid'
+    assert type(cols)==list, 'The format of columns give in not in list format' 
     Goalies_df = pd.read_csv(path,error_bad_lines=False,usecols=cols)
+    assert len(Goalies_df)>0, 'The Dataframe is empty' 
+    assert ~Goalies_df.duplicated().any()
     return(Goalies_df)
 
 
@@ -30,6 +35,7 @@ def Change_column_to_StringDatattype():
                     The datatype of the column changed
     """
     Goalies_df['tmID'] = Goalies_df['tmID'].astype(pd.StringDtype())
+    assert (Goalies_df['tmID'].dtype)=='string','the datatype has not changed datatype error' 
     return(Goalies_df['tmID'].dtype)
 
 
@@ -40,7 +46,9 @@ def Change_Column_to_yearDatatype():
             Returns:
                     The datatype of the column changed
    """
-   Goalies_df['year'] = pd.to_datetime(Goalies_df['year'], format='%Y')
+   Goalies_df['year'] = pd.to_datetime(Goalies_df['year'])
+   Goalies_df['year']=pd.DatetimeIndex(Goalies_df['year']).year
+   assert Goalies_df['year'].dtype== 'int64', 'Conversion of datatype error'
    return(Goalies_df['year'].dtype)
         
 
@@ -57,6 +65,8 @@ def Caluclate_Wins_Loses_GP_Agg():
     wins_agg = Groupby_stg['W']/Groupby_stg['playerID']
     losses_agg = Groupby_stg['L']/Groupby_stg['playerID']
     GP_agg = Groupby_stg['GP']/Groupby_stg['playerID']
+    
+    assert len(wins_agg)==len(losses_agg)==len(GP_agg),'All are grouped by teamid' 
     return(wins_agg,losses_agg,GP_agg)
 
 
@@ -70,6 +80,8 @@ def Caluclate_agg_Stg():
     
     Mins_over_GA_agg = Goalies_df.groupby(['tmID','year']).Min.agg(['sum'])/Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])
     GA_over_SA_agg = Goalies_df.groupby(['tmID','year']).GA.agg(['sum'])/Goalies_df.groupby(['tmID','year']).SA.agg(['sum'])
+    
+    assert len(Mins_over_GA_agg)==len(GA_over_SA_agg), 'Len of both of them as they are grouped by Teamid,year'
     return(Mins_over_GA_agg,GA_over_SA_agg)
 
 
@@ -83,6 +95,7 @@ def avg_percentage_wins():
     avg_perecentage_wins_stg_1 = Goalies_df.groupby(['tmID','playerID']).agg({'W': 'sum', 'GP': 'sum'})
     avg_perecentage_wins_stg_2 =avg_perecentage_wins_stg_1['W'] /( avg_perecentage_wins_stg_1['GP'])*100
     avg_perecentage_wins = avg_perecentage_wins_stg_2.groupby('tmID').mean()
+    
     return(avg_perecentage_wins)
 
 def most_goals_stopped_efficency():
@@ -111,7 +124,8 @@ def most_goals_stopped_efficency():
     most_efficient_player_dict ={}
     most_efficient_player_dict['playerID']= list(most_goals_stopped_eff['playerID'])
     most_efficient_player_dict['efficiency']= list(most_goals_stopped_eff[0])
-
+    
+    assert len(most_goals_stopped_dict)==len(most_goals_stopped_dict), 'The length of both of them should be same as the return a dictionay with 1 player'
     return(most_goals_stopped_dict,most_efficient_player_dict)
         
 
